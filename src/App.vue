@@ -23,6 +23,7 @@
       style="z-index: 2">
       <FloorCard :title="next.text" />
     </div>
+    <h1 class="fixed fixed--center">No more floors :(</h1>
     </v-main>
   </v-app>
 </template>

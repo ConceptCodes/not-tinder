@@ -6,70 +6,73 @@
       </div>
     </v-app-bar>
     <v-main class="container">
-    <div class="fixed fixed--center" style="z-index: 3">
-      <Vue2InteractDraggable
-        v-if="isVisible"
-        :interact-x-threshold="200"
-        @draggedRight="accept"
-        @draggedLeft="decline"
-        class="rounded-borders card card--one">
-        <div class="flex flex--center" style="height: 100%">
-          <h1>{{current.text}}</h1>
-        </div>
-      </Vue2InteractDraggable>
-    </div>
+      <div class="fixed fixed--center" style="z-index: 3">
+        <Vue2InteractDraggable
+          v-if="isVisible"
+          :interact-x-threshold="200"
+          @draggedRight="accept"
+          @draggedLeft="decline"
+          class="rounded-borders card"
+        >
+          <FloorCard :title="current.text" />
+        </Vue2InteractDraggable>
+      </div>
     <div
+      v-if="next"
       class="rounded-borders card card--two fixed fixed--center"
       style="z-index: 2">
-      <div class="flex flex--center" style="height: 100%">
-        <h1>test</h1>
-      </div>
+      <FloorCard :title="next.text" />
     </div>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import { Vue2InteractDraggable } from 'vue2-interact'
+import { Vue2InteractDraggable } from "vue2-interact";
+import FloorCard from '@/components/FloorCard'
 
 export default {
-  name: 'app',
-  components: { Vue2InteractDraggable },
+  name: "app",
+  components: { Vue2InteractDraggable, FloorCard },
   data() {
     return {
       isVisible: true,
       index: 0,
+      selection: 1,
       cards: [
-        { text: 'floor one' },
-        { text: 'floor two' },
-        { text: 'floor three' },
-      ]
-    }
+        { text: "floor one" },
+        { text: "floor two" },
+        { text: "floor three" },
+      ],
+    };
   },
   computed: {
     current() {
-      return this.cards[this.index]
+      return this.cards[this.index];
+    },
+    next() {
+      return this.cards[this.index + 1]
     }
   },
   methods: {
     accept() {
-      window.alert('accepted')
+      window.alert("accepted");
       setTimeout(() => this.isVisible = false, 200)
       setTimeout(() => {
         this.index++
         this.isVisible = true
       }, 300)
-    }, 
+    },
     decline() {
-      window.alert('declined')
-      setTimeout(() => this.isVisible = false, 200)
+      window.alert("declined");
+      setTimeout(() => (this.isVisible = false), 200);
       setTimeout(() => {
-        this.index++
-        this.isVisible = true
-      }, 300)
-    }
-  }
-}
+        this.index++;
+        this.isVisible = true;
+      }, 300);
+    },
+  },
+};
 </script>
 
 
@@ -101,18 +104,13 @@ export default {
 }
 .card {
   width: 300px;
-  height: 400px;
+  height: 300px;
   color: white;
-  &--one {
-    background-color: orange;
-  }
   &--two {
-    background-color: red;
     width: 280px;
     top: 51%;
   }
   &--three {
-    background-color: orange;
     width: 260px;
     top: 51.8%;
   }

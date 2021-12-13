@@ -2,7 +2,7 @@
   <v-app>
     <v-app-bar app dark>
       <div class="d-flex align-center">
-        <h1>! Tinder</h1>
+        <h1>Insider Stall Tinder</h1>
       </div>
     </v-app-bar>
     <v-main class="container">

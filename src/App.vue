@@ -31,7 +31,7 @@
 <script>
 import { Vue2InteractDraggable } from "vue2-interact";
 import FloorCard from '@/components/FloorCard'
-import { db } from '@/services/firebase'
+import { db } from '@/firebase'
 
 export default {
   name: "app",

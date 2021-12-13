@@ -1,6 +1,7 @@
 /* Import the firebase SDK and extend with firestore */
-import firebase from 'firebase';
-require('firebase/firestore');
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
 
 firebase.initializeApp({
     apiKey: process.env.VUE_APP_API_KEY,

@@ -31,6 +31,7 @@
 <script>
 import { Vue2InteractDraggable } from "vue2-interact";
 import FloorCard from '@/components/FloorCard'
+import { db } from '@/services/firebase'
 
 export default {
   name: "app",
@@ -40,12 +41,11 @@ export default {
       isVisible: true,
       index: 0,
       selection: 1,
-      cards: [
-        { text: "floor one" },
-        { text: "floor two" },
-        { text: "floor three" },
-      ],
+      cards: []
     };
+  },
+  mounted() {
+    this.loadFloors()
   },
   computed: {
     current() {
@@ -56,6 +56,18 @@ export default {
     }
   },
   methods: {
+    loadFloors() {
+      db.collection("floors")
+        .get()
+        .then((querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+           this.cards.push({ ...doc.data() });
+          });
+        })
+        .catch((error) => {
+          console.log("Error getting documents: ", error);
+        });
+    },
     accept() {
       window.alert("accepted");
       setTimeout(() => this.isVisible = false, 200)

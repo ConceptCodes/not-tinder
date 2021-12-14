@@ -7,36 +7,20 @@
     </v-app-bar>
     <v-main class="container">
       <div class="fixed fixed--center" style="z-index: 3">
-              <v-menu
-      transition="slide-y-transition"
-      bottom
-    >
+    <v-menu transition="slide-y-transition" bottom>
       <template v-slot:activator="{ on, attrs }" style="z-index: 1; width: 90%;">
-        <v-btn
-          class="purple rounded-borders card"
-          color="primary"
-          dark
-          v-bind="attrs"
-          v-on="on"
-           style="z-index: 1; height: 35px; width: 85%"
-        >
-          {{current.text}}
-        </v-btn>
-                    <v-btn
-              color="red"
-              fab
-              small
-              dark
-              style="left: 9px"
-            >
-              <v-icon>mdi-bell-ring</v-icon>
-            </v-btn>
+          <v-btn  class="purple rounded-borders card" color="primary" dark v-bind="attrs" v-on="on" 
+          style="z-index: 1; height: 35px; width: 85%">
+            {{current.text}}
+          </v-btn>
+          <v-btn color="red" fab small dark style="left: 9px">
+            <v-icon>mdi-bell-ring</v-icon>
+          </v-btn>
       </template>
       <v-list>
         <v-list-item 
           v-for="(item, i) in items"
-          :key="i"
-        >
+          :key="i">
           <v-list-item-title>{{ item.title }}</v-list-item-title>
         </v-list-item>
       </v-list>
@@ -66,6 +50,9 @@ import { Vue2InteractDraggable } from "vue2-interact";
 import FloorCard from '@/components/FloorCard'
 import { db } from '@/services/firebase'
 
+const firebaseData = db.collection("stall_id");
+var unsubscribe;
+
 export default {
   name: "app",
   components: { Vue2InteractDraggable, FloorCard },
@@ -90,12 +77,42 @@ export default {
         { title: 'Floor Five' },
       ],
       testFirebaseData: [],
+      stallData: [],
       dataInView: []
     };
   },
   mounted() {
-    this.loadFloors()
+    //this.loadFloorsInitally();
+            //this.loadFloors();
     //should be able to pass this out right
+  },
+  created() {
+    firebaseData.get().then(snapshot => {
+      snapshot.forEach(doc => {
+        this.stallData.push({
+          id: doc.id,
+          occupied: doc.data().occupied,
+          duration: doc.data().duration
+        });
+      });
+      console.log(this.stallData);
+      this.loadFloorData();
+    });
+
+    unsubscribe = firebaseData.onSnapshot(snapshot => {
+      snapshot.docChanges().forEach(change => {
+        if (change.type === 'modified'){
+          const updatedStall = this.stallData.find(
+            stall => stall.id === change.doc.id
+          );
+          updatedStall.occupied = change.doc.data().occupied;
+          console.log("Stall was updated: ", updatedStall);
+        }
+      })
+    });
+  },
+  destroyed() {
+    unsubscribe();
   },
   computed: {
     current() {
@@ -106,7 +123,7 @@ export default {
     }
   },
   methods: {
-    loadFloors() {
+    loadFloorsInitally() {
       db.collection("stall_id")
         .get()
         .then((querySnapshot) => {
@@ -117,7 +134,7 @@ export default {
         .catch((error) => {
           console.log("Error getting documents: ", error);
         });
-    },
+      },
     accept() {
       if(this.index!=2){
       setTimeout(() => this.isVisible = false, 200)
@@ -139,12 +156,12 @@ export default {
       }
     },
     onGenderSwitch(value) {
-      console.log('parent knows of the new value ' + value)
+      console.log('Visual update: Gender has switched to ' + value)
       this.genderSelected = value;
       this.loadFloorData();
     },
     onBooking(value){
-      console.log('A booking has been made at stall: '+value+ ' now we send to firebase');
+      console.log('Database update: A booking has been made at stall: '+value+ ' now we send to firebase');
       db.collection("stall_id").doc(value).update({occupied: true});
     },
     loadFloorData(){
@@ -153,27 +170,23 @@ export default {
       //all data is stored in testFirebaseData
       var floorValue = this.index+1;
       var finalData = [];
-      console.log('the selected floor is '+ floorValue);
-      console.log('the selected gender is '+ this.genderSelected);
-      for (let i =0; i < this.testFirebaseData.length; i++){
+      console.log('Summary update: the selected floor is '+ floorValue);
+      console.log('Summary update: the selected gender is '+ this.genderSelected);
+      for (let i =0; i < this.stallData.length; i++){
         //first check for floor
-        if(this.testFirebaseData[i].id.charAt(0) == floorValue && this.testFirebaseData[i].id.charAt(1) == this.genderSelected){
-            console.log('found a match '+ this.testFirebaseData[i].id);
-            finalData.push(this.testFirebaseData[i]);
+        if(this.stallData[i].id.charAt(0) == floorValue && this.stallData[i].id.charAt(1) == this.genderSelected){
+            console.log('Summary update: found a stall that belongs in current view '+ this.stallData[i].id);
+            finalData.push(this.stallData[i]);
         }
       }
       this.dataInView = finalData;
     }
   },
   watch: {
-    testFirebaseData: function() {
-      console.log('watcher was hit!: ')
-      console.log('current floor index '+ this.index)
-       this.loadFloorData();
+
       //this is only going to load the available data for the current front-end configuration
       //when a firebase collection change occurs..... unless we need to watch for changes in the fb collection to?
      // this.loadFloorData()
-    }
   }
 };
 </script>

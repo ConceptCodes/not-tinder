@@ -73,13 +73,6 @@ export default {
       stallSelection: function() {
         console.log(this.stallSelection);
       },
-      stallData: function() {
-        console.log('stall data is ---> ')
-        this.stallData.forEach(element => {
-          console.log(element.id);
-          console.log(element.occupied);
-        });
-      }
     },
     methods: {
       bookStall(stallNum, gender, floor){
@@ -98,7 +91,7 @@ export default {
           this.$emit('booking', id)
         }
         else {
-          alert('some data was not added: booking not available at this time.')
+          alert('Error: some data was not added, therefore booking not available at this time.')
         }
       }
     },

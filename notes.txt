@@ -1,0 +1,16 @@
+Insider Stall  
+
+[ USER ]
+    - anonymous login
+    - can view all stalls
+
+[ BATHROOM ]
+    - can be female or male
+    - has a list of stalls 
+    - each stall can be occuipied or not 
+
+[ BOOK BATHROOM ]
+    - stall has to be available
+    - gender of stall must match user gender 
+    - when booked a timer is set for 20 minutes or so 
+    - then stall becomes available again      

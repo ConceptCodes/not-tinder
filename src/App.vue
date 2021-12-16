@@ -6,6 +6,7 @@
       </div>
     </v-app-bar>
     <v-main class="container">
+      <p>{{ currentUser.uid }}</p>
       <div class="fixed fixed--center" style="z-index: 3">
     <v-menu transition="slide-y-transition" bottom>
       <template v-slot:activator="{ on, attrs }" style="z-index: 1; width: 90%;">
@@ -48,7 +49,7 @@
 <script>
 import { Vue2InteractDraggable } from "vue2-interact";
 import FloorCard from '@/components/FloorCard'
-import { db } from '@/services/firebase'
+import { db, auth } from '@/firebase'
 
 const firebaseData = db.collection("stall_id");
 var unsubscribe;
@@ -62,6 +63,7 @@ export default {
       index: 0,
       selection: 1,
       genderSelected : 'b',
+      currentUser: null,
       //pipe the current data into cards. like here.
       // what data should be passed?
       cards: [
@@ -85,14 +87,14 @@ export default {
     //this.loadFloorsInitally();
             //this.loadFloors();
     //should be able to pass this out right
+    this.loginUser()
   },
   created() {
     firebaseData.get().then(snapshot => {
       snapshot.forEach(doc => {
         this.stallData.push({
           id: doc.id,
-          occupied: doc.data().occupied,
-          duration: doc.data().duration
+          ...doc.data()
         });
       });
       console.log(this.stallData);
@@ -123,6 +125,18 @@ export default {
     }
   },
   methods: {
+    loginUser() {
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          // User is signed in, see docs for a list of available properties
+          // https://firebase.google.com/docs/reference/js/firebase.User
+          this.currentUser = user;
+          // ...
+        } else {
+          this.currentUser = null;
+        }
+      });
+    },
     loadFloorsInitally() {
       db.collection("stall_id")
         .get()
@@ -214,9 +228,6 @@ export default {
     top: 50%;
     transform: translate(-50%, -50%);
   }
-}
-.rounded-borders {
-  border-radius: 12px;
 }
 .card {
   width: 300px;

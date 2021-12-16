@@ -6,7 +6,7 @@
       </div>
     </v-app-bar>
     <v-main class="container">
-      <div class="fixed fixed--center" style="z-index: 3">
+      <div class="fixed fixed--center" style="z-index: 3" v-if="dataInView[0]">
     <v-menu transition="slide-y-transition" bottom>
       <template v-slot:activator="{ on, attrs }" style="z-index: 1; width: 90%;">
           <v-btn  class="purple rounded-borders card" color="primary" dark v-bind="attrs" v-on="on" 
@@ -92,7 +92,7 @@ export default {
         this.stallData.push({
           id: doc.id,
           occupied: doc.data().occupied,
-          duration: doc.data().duration
+          duration: doc.data().duration.seconds
         });
       });
       console.log(this.stallData);
@@ -107,6 +107,7 @@ export default {
           );
           updatedStall.occupied = change.doc.data().occupied;
           console.log("Stall was updated: ", updatedStall);
+          this.loadFloorData();
         }
       })
     });
@@ -164,6 +165,15 @@ export default {
       console.log('Database update: A booking has been made at stall: '+value+ ' now we send to firebase');
       db.collection("stall_id").doc(value).update({occupied: true});
     },
+    convertDurationToElapsed(stallNumber){
+      let start = Date.now();
+      let stallDuration = this.stallData[stallNumber].duration*1000; 
+      const elapsed = start - stallDuration; 
+      // final calculation of elapsed time since duration - current time
+      const secondsElapsed = Math.floor(elapsed / 1000);
+      console.log(secondsElapsed+ ' seconds elapsed since  '+this.stallData[stallNumber]+ ' was occupied');
+      return secondsElapsed;
+    },
     loadFloorData(){
       //index is == to the floor
       //genderSelected is == to the gender choice ('m' or 'f')
@@ -176,13 +186,21 @@ export default {
         //first check for floor
         if(this.stallData[i].id.charAt(0) == floorValue && this.stallData[i].id.charAt(1) == this.genderSelected){
             console.log('Summary update: found a stall that belongs in current view '+ this.stallData[i].id);
-            finalData.push(this.stallData[i]);
+            var elapsedTime = this.convertDurationToElapsed(i);
+            finalData.push({id:this.stallData[i].id, occupied: this.stallData[i].occupied, duration: elapsedTime});
         }
       }
+      // all of the durations should be converted by this time
       this.dataInView = finalData;
     }
   },
   watch: {
+    dataInView() {
+      console.log('something occured')
+      // what if we pass the duration here. (set the elapsed time in the data variable)
+      // still allows us to bind the 
+    }
+
 
       //this is only going to load the available data for the current front-end configuration
       //when a firebase collection change occurs..... unless we need to watch for changes in the fb collection to?

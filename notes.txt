@@ -3,6 +3,7 @@ Insider Stall
 [ USER ]
     - anonymous login
     - can view all stalls
+    - can be female or male
 
 [ BATHROOM ]
     - can be female or male

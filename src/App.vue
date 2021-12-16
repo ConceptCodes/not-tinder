@@ -48,7 +48,8 @@
 <script>
 import { Vue2InteractDraggable } from "vue2-interact";
 import FloorCard from '@/components/FloorCard'
-import { db } from '@/services/firebase'
+import { db, currentTime } from '@/services/firebase'
+
 
 const firebaseData = db.collection("stall_id");
 var unsubscribe;
@@ -105,8 +106,10 @@ export default {
           const updatedStall = this.stallData.find(
             stall => stall.id === change.doc.id
           );
+          updatedStall.duration = change.doc.data().duration.seconds;
           updatedStall.occupied = change.doc.data().occupied;
           console.log("Stall was updated: ", updatedStall);
+          console.log("timestamp was added "+change.doc.data().duration.seconds )
           this.loadFloorData();
         }
       })
@@ -163,7 +166,9 @@ export default {
     },
     onBooking(value){
       console.log('Database update: A booking has been made at stall: '+value+ ' now we send to firebase');
-      db.collection("stall_id").doc(value).update({occupied: true});
+      var myTimestamp = currentTime;
+      console.log(myTimestamp+' is when the object was stored.')
+      db.collection("stall_id").doc(value).update({occupied: true, duration: myTimestamp});
     },
     convertDurationToElapsed(stallNumber){
       let start = Date.now();
@@ -171,7 +176,7 @@ export default {
       const elapsed = start - stallDuration; 
       // final calculation of elapsed time since duration - current time
       const secondsElapsed = Math.floor(elapsed / 1000);
-      console.log(secondsElapsed+ ' seconds elapsed since  '+this.stallData[stallNumber]+ ' was occupied');
+      console.log('fk1: ' +secondsElapsed+ ' seconds elapsed since  '+this.stallData[stallNumber]+ ' was occupied');
       return secondsElapsed;
     },
     loadFloorData(){

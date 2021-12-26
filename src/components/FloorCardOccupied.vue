@@ -1,4 +1,4 @@
-<template v-if="stallData">
+<template>
   <v-card :class="colorOfCard"  class="mx-auto my-12 darken-2 white--text" max-width="600" id="floor-card">
     <v-card-title class="dark-orange">Ur taking a shit!</v-card-title>
     <v-card-text>
@@ -34,17 +34,6 @@ export default {
         colorOfCard: 'orange',
     }),
     props: {
-        floor_num: {
-            type: Number,
-            default: 0
-        },
-        title: {
-            type: String,
-            default: 'Floor Name'
-        },
-        stallData: {
-          type: Array,
-        },
         stallID: {
             type: String
         },
@@ -62,8 +51,9 @@ export default {
       },
     },
     methods: {
-      unoccupyStall(stall){
-          this.$emit('unoccupyStall', stall);
+      unoccupyStall(){
+        console.log('running unoccupy stall')
+          this.$emit('unoccupyStall');
         }
       ,
     },

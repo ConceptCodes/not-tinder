@@ -1,20 +1,31 @@
 {
   "name": "not-tinder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "start": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
+  "engines": {
+    "node": "16.11.1",
+    "npm": "8.3.0"
+  },
   "dependencies": {
+    "@heroku/buildpack-registry": "^1.0.1",
+    "async-file": "^2.0.2",
+    "cli-ux": "^6.0.6",
     "core-js": "^3.6.5",
     "firebase": "^9.6.1",
+    "got": "^12.0.0",
+    "luxon": "^2.2.0",
+    "phoenix": "^1.6.4",
     "register-service-worker": "^1.7.1",
     "vue": "^2.6.11",
     "vue2-interact": "^0.0.3",
     "vuetify": "^2.4.0",
-    "vuex": "^3.6.2"
+    "vuex": "^3.6.2",
+    "vuexfire": "^3.2.5"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
@@ -26,7 +37,6 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
-    "node-sass": "^4.12.0",
     "sass": "~1.32.0",
     "sass-loader": "^10.0.0",
     "vue-cli-plugin-vuetify": "~2.4.5",

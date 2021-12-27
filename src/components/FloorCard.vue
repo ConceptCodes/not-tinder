@@ -16,23 +16,24 @@
         <v-chip v-for="(stall) in storeFloorStalls" :key="stall.id" :disabled="stall.occupied">{{stall.occupied ? 'occupied for:'+ durations(stall): stall.id}}</v-chip>
       </v-chip-group>
     </v-card-text>
-    <v-card-title text="center">Reserve Ahead</v-card-title>
+    <v-card-title text="center">{{stallSelection != null ? 'Reserve Ahead:': ""}}</v-card-title>
     <v-card-text>
-      <v-chip-group v-model="selection" active-class="black white--text" column>
-        <v-chip>5:30PM</v-chip>
-        <v-chip>7:30PM</v-chip>
-        <v-chip>8:00PM</v-chip>
+      <v-chip-group v-model="selection" active-class="black white--text" column v-if="stallSelection != null">
+        <v-chip small :disabled="!reservationTimes[0].available">{{reservationTimes[0].time.hour}} hr {{reservationTimes[0].time.minute}} m</v-chip>
+        <v-chip small :disabled="!reservationTimes[1].available">{{reservationTimes[1].time.hour}} hr {{reservationTimes[1].time.minute}} m</v-chip>
+        <v-chip small :disabled="!reservationTimes[2].available">{{reservationTimes[2].time.hour}} hr {{reservationTimes[2].time.minute}} m</v-chip>
       </v-chip-group>
       <v-divider class="mx-2"></v-divider>
-      <v-row>
-        <v-btn style="margin-top: 35px; width: 45%;"
-          elevation="2" @click="bookStall(occupiedID)"
+      <v-row  style="margin-top: 10px; margin-bottom: 5px;">
+        <v-card-subtitle v-if="stallSelection == null" style="color: white">Choose a stall and/or a reservation time to continue.</v-card-subtitle>
+        <v-btn style="width: 45%;"
+          elevation="2" @click="bookStall(occupiedID)" :disabled="stallSelection == null"
         >Book Now</v-btn>
-                <v-btn style=" margin-top: 35px; width: 45%; margin-left: 10%;" 
-          elevation="2" @click="checkDuration()"
+                <v-btn style="width: 45%; margin-left: 10%;" 
+          elevation="2" :disabled="stallSelection == null" @click="bookReservation(reservationTimes[selection].timestamp, storeFloorStalls[stallSelection].id)"
         >Reserve</v-btn>
       </v-row>
-    </v-card-text>
+      </v-card-text>
   </v-card>
 </template>
 
@@ -102,6 +103,12 @@ export default {
     },
     computed: {
       ...mapState(["stalls", "currentGender"]),
+      reservationTimes: function() {
+        if(this.stallSelection!=null) {
+          return this.populateReservations(this.storeFloorStalls[this.stallSelection].id);
+        }
+        return [];
+      },
       genderSelection: {
         get () {
           var stateGender = this.$store.state.currentGender;
@@ -142,11 +149,11 @@ export default {
           return 'red';
         }
       },
-        ...mapGetters({ timeDifference: "getDurationFromNow"})
+        ...mapGetters({ populateReservations: "getReservationsForStall", timeDifference: "getDurationFromNow"})
     },
     methods: {
       checkDuration() {
-        console.log(this.timeDifference('1f1'));
+        console.log(this.reservationTimes);
       },
       durations(stall) {
         var duration = this.timeDifference(stall.id);
@@ -163,6 +170,15 @@ export default {
           }
           else {
             alert('Error: some data was not added, therefore booking not available at this time.') 
+          }
+      },
+      bookReservation(timestamp, stallID){
+        console.log('book reservation?');
+        if(timestamp && stallID){
+          this.$emit('bookingReservation', [timestamp, stallID])
+        }
+         else {
+            alert('Error: some data was not added, therefore reservation not available at this time.') 
           }
       },
       checkForDisabled() {

@@ -15,3 +15,4 @@ firebase.initializeApp({
 export const currentTime = firebase.firestore.Timestamp.fromDate(new Date());
 export const db = firebase.firestore()
 export const auth = firebase.auth()
+export const arrayUnion = firebase.firestore.FieldValue.arrayUnion();

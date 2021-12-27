@@ -22,7 +22,7 @@
           @draggedLeft="decline"
           class="rounded-borders card"
         >
-          <FloorCard @clicked="onGenderSwitch" :floor_num="index"  @booking="onBooking" :title="current.text" :storeFloorStalls="stallsVueFire"/>
+          <FloorCard @clicked="onGenderSwitch" :floor_num="index" @bookingReservation="onBookingReservation" @booking="onBooking" :title="current.text" :storeFloorStalls="stallsVueFire"/>
         </Vue2InteractDraggable>
       </div>
     <div
@@ -120,7 +120,7 @@ export default {
   },
   methods: {
     ...mapMutations(['set_current_gender']),
-    ...mapActions(['onUnbookingAction','increaseFloor','decreaseFloor', "updateGender" ,"loginUser", 'onBookingAction', 'bindStalls']),
+    ...mapActions(['onReservationAction','onUnbookingAction','increaseFloor','decreaseFloor', "updateGender" ,"loginUser", 'onBookingAction', 'bindStalls']),
     accept() {
       if(this.index!=6){
       setTimeout(() => this.isVisible = false, 200)
@@ -157,6 +157,12 @@ export default {
       //run action to unbook the stall
       console.log('running onunoccupy command');
       this.onUnbookingAction();
+    },
+    onBookingReservation(data){
+      var timestamp = data[0];
+      var stallID = data[1];
+      this.onReservationAction({'timestamp': timestamp, 'stallID': stallID})
+      console.log('reservation for '+timestamp+ ' on stall ID: ' + stallID)
     },
     convertDurationToElapsed(stallNumber){
       let start = Date.now();

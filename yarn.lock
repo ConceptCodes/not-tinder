@@ -6442,6 +6442,11 @@
   dependencies:
     "yallist" "^4.0.0"
 
+"luxon@^1.25.0":
+  "integrity" "sha512-TfTiyvZhwBYM/7QdAVDh+7dBTBA29v4ik0Ce9zda3Mnf8on1S5KJI8P2jKFZ8+5C0jhmr0KwJEO/Wdpm0VeWJQ=="
+  "resolved" "https://registry.npmjs.org/luxon/-/luxon-1.28.0.tgz"
+  "version" "1.28.0"
+
 "luxon@^2.2.0":
   "integrity" "sha512-LwmknessH4jVIseCsizUgveIHwlLv/RQZWC2uDSMfGJs7w8faPUi2JFxfyfMcTPrpNbChTem3Uz6IKRtn+LcIA=="
   "resolved" "https://registry.npmjs.org/luxon/-/luxon-2.2.0.tgz"
@@ -9679,6 +9684,18 @@
     "loader-utils" "^1.1.0"
     "vue-hot-reload-api" "^2.3.0"
     "vue-style-loader" "^4.1.0"
+
+"vue-luxon@^0.10.0":
+  "integrity" "sha512-edMqK3qfWNze9z7Upbkb6RSI5XFFwaU3LwD6ZPJJPBhinTg1VBH7Rn8qNi5+5GmHMcbp2ybnOWm78m5lTjznFw=="
+  "resolved" "https://registry.npmjs.org/vue-luxon/-/vue-luxon-0.10.0.tgz"
+  "version" "0.10.0"
+  dependencies:
+    "luxon" "^1.25.0"
+
+"vue-router@^3.5.3":
+  "integrity" "sha512-FUlILrW3DGitS2h+Xaw8aRNvGTwtuaxrRkNSHWTizOfLUie7wuYwezeZ50iflRn8YPV5kxmU2LQuu3nM/b3Zsg=="
+  "resolved" "https://registry.npmjs.org/vue-router/-/vue-router-3.5.3.tgz"
+  "version" "3.5.3"
 
 "vue-style-loader@^4.1.0", "vue-style-loader@^4.1.2":
   "integrity" "sha512-sFuh0xfbtpRlKfm39ss/ikqs9AbKCoXZBpHeVZ8Tx650o0k0q/YCM7FRvigtxpACezfq6af+a7JeqVTWvncqDg=="

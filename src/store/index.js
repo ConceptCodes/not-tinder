@@ -55,12 +55,19 @@ function checkIfTimeConflict(reservations, suggestedTime) {
   return false;
 }
 
+//this is neccessary for security purposes: we dont want to expose userID info to
+//the front end client (they only should access what they need to function)
+//the function will true/false, depending on if the userID is currently in the firebase col
+
+
 const store = new Vuex.Store({
   state: {
     currentUser: null,
     stalls: [],
     currentFloor: 1,
-    currentGender: 'f'
+    currentGender: 'f',
+    currentUserDocID: null,
+    users: []
   },
   getters: {
       getStallsByFloor: (state) => (floorNumber, gender) => {
@@ -81,6 +88,21 @@ const store = new Vuex.Store({
       },
       getCurrentGender: (state) => {
         return state.currentGender;
+      },
+      getReservations: (state) => {
+        //current users reservations will be displayed, lets return a pretty object
+        //{{stall, reservationTime}}
+        var thisUser = state.users.find(user => user.user === state.currentUser);
+        var returnObject = [];
+        for (var i in thisUser.reservation) {
+          var secondsinDateTime = DateTime.fromSeconds(thisUser.reservation[i].time.seconds);
+          var date = secondsinDateTime.toLocaleString({month: 'short', day: 'numeric'});
+          var time = secondsinDateTime.toLocaleString({hour: '2-digit', minute: '2-digit'});
+          //var test = DateTime.now().diff(secondsinDateTime, ['hours', 'minutes', 'seconds']).toObject();
+          returnObject.push({'stallID': thisUser.reservation[i].stall_id, 'date': date, 'time': time})
+        }
+        console.log(returnObject);
+        return returnObject;
       },
       getUserOccupiesStall: (state) => {
         //first check if any stalls are occupied by the user- return true if so
@@ -160,7 +182,29 @@ const store = new Vuex.Store({
       }
   },
   mutations: {
-    SET_CURRENT_USER: (state, payload) => { state.currentUser = payload },
+    SET_CURRENT_USER: (state, payload) => { 
+      state.currentUser = payload;
+      var total = 0;
+      db.collection('users').get().then(querySnapshot => {
+        const documents = querySnapshot.docs.map(doc => doc.data());
+        for(var index in documents) {
+          if(documents[index].user == payload){
+            //found a match
+            console.log('found a match');
+            total++;
+          }
+        }
+        console.log(total);
+        if(total === 0){
+          //didn't find any matches, so adding user
+          console.log('adding user');
+          db.collection("users").add({user: payload});
+  
+        } else {
+          console.log('not adding a user to firebase')
+        }
+      });
+    },
     SET_STALLS: (state, payload) => { state.stalls = payload },
     set_current_floor_increment: (state) => {state.currentFloor++},
     set_current_floor_decrement: (state) => {state.currentFloor--},
@@ -179,8 +223,10 @@ const store = new Vuex.Store({
     //payload should be a timestamp for the reservation slot
     RESERVATION_BOOKING (state, payload) {
       var anyStalls = state.stalls.filter(stall => stall.id === payload.stallID);
+      var anyUsers = state.users.filter(user => user.user === state.currentUser);
       var firebaseTimestamp = new Date(payload.timestamp);
       db.collection("stall_id").doc(anyStalls[0].id).update({reservation: firebase.firestore.FieldValue.arrayUnion({time: firebaseTimestamp, user: state.currentUser})});
+      db.collection("users").doc(anyUsers[0].id).update({reservation: firebase.firestore.FieldValue.arrayUnion({time: firebaseTimestamp, stall_id: anyStalls[0].id})});
     },
     //needs a set reservation button. that will add the timestamp to the reservation array. 
     ...vuexfireMutations
@@ -190,12 +236,15 @@ const store = new Vuex.Store({
             // return the promise returned by `bindFirestoreRef`
             return bindFirestoreRef('stalls', db.collection('stall_id'))
         }),
+        bindUsers: firestoreAction(({ bindFirestoreRef }) => {
+          return bindFirestoreRef('users', db.collection('users') )
+        }),
       loginUser({commit}) {
         console.log('attempting to login')
         auth.signInAnonymously()
         .then(() => {
           auth.onAuthStateChanged((user) => {
-            if (user) { commit('SET_CURRENT_USER', user.uid) } 
+            if (user) { commit('SET_CURRENT_USER', user.uid); } 
             else { commit('SET_CURRENT_USER', null) }
           });
         }).catch((error) => { console.error(error) });

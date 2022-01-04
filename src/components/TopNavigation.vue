@@ -36,7 +36,7 @@
             <v-list-item-icon>
               <v-icon>mdi-account</v-icon>
             </v-list-item-icon>
-            <v-list-item-title>Account History</v-list-item-title>
+            <v-list-item-title><router-link to="/activity">Recent Activity</router-link></v-list-item-title>
           </v-list-item>
           <v-list-item>
             <v-list-item-icon>
@@ -48,7 +48,9 @@
       </v-list>
     </v-navigation-drawer>
 
-      <v-toolbar-title>Insider Stall</v-toolbar-title>
+      <v-toolbar-title v-if="navName === 'Home'">Insider Stall</v-toolbar-title>
+      <v-toolbar-title v-if="navName === 'Activity'">Recent Activity</v-toolbar-title>
+      <v-toolbar-title v-else-if="navName === 'Reservations'">Reservations</v-toolbar-title>
             <v-spacer></v-spacer>
 
       <v-btn icon v-if="!drawer">
@@ -70,6 +72,11 @@ data() {
     drawer: false,
     group: null,
     }
+},
+props: {
+  navName: {
+    type: String
+  }
 }
 }
 </script>

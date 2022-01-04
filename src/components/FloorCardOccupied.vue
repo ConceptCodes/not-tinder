@@ -1,6 +1,6 @@
 <template>
-  <v-card :class="colorOfCard"  class="mx-auto my-12 darken-2 white--text" max-width="600" id="floor-card">
-    <v-card-title class="dark-orange">Ur taking a shit!</v-card-title>
+  <v-card :class="colorOfCard" style="z-index: 3" class="mx-auto my-12 darken-2 white--text" max-width="600" id="floor-card">
+    <v-card-title class="dark-orange">Ur viewing this message because:</v-card-title>
     <v-card-text>
       <div class="white--text">You have occupied this stall for:</div>
     </v-card-text>
@@ -17,6 +17,7 @@
           elevation="2" @click="unoccupyStall(stallID)"
         >Un-occupy the stall</v-btn>
       </v-row>
+      
     </v-card-text>
   </v-card>
 </template>
@@ -60,9 +61,63 @@ export default {
 }
 </script>
 
-<style>
-.centerElem {
-  left: 30%;
+<style lang="scss" scoped>
+.container {
+  width: 100%;
+  height: 100vh;
+}
+.flex {
+  display: flex;
+  &--center {
+    align-items: center;
+    justify-items: center;
+    justify-content: center;
+  }
+}
+.fixed {
   position: fixed;
+  &--center {
+    left: 50%;
+    top: 15%;
+    transform: translate(-50%, -50%);
+  }
+}
+.menuFixed {
+    position: fixed;
+    
+    &--center {
+    left: 50%;
+    top: 14%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.menuCard {
+  width: 300px;
+  height: 45px;
+  background-color: #061826;
+}
+.hoverIcon:hover {
+  background-color: red;
+}
+.rounded-borders {
+  border-radius: 12px;
+}
+
+.menu-rounded-borders {
+  border-radius: (12px, 12px, 12px, 0px);
+}
+.card {
+  width: 300px;
+  height: 450px;
+  color: white;
+  &--two {
+    width: 280px;
+    top: 36%;
+  }
+  &--three {
+    width: 260px;
+    top: 37%;
+  }
 }
 </style>

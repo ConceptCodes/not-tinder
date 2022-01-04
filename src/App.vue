@@ -1,13 +1,13 @@
 <template>
   <v-app>
-    <TopBarNav/>
-    <router-view/>
+    <TopBarNav :navName="$route.name"/>
+    <router-view :displayNotification="displayNotification" :displayMsg="displayMsg"/>
   </v-app>
 </template>
 
 <script>
 import TopBarNav from '@/components/TopNavigation'
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   name: "app",
   components: { TopBarNav },
@@ -36,6 +36,9 @@ export default {
       stallData: [],
       dataInView: [],
       vuexStallData : [],
+      displayNotification: false,
+      displayMsg: '',
+      count: 0
     };
   },
   mounted() {
@@ -48,6 +51,7 @@ export default {
   created() {
     this.bindUsers();
     this.bindStalls();
+    this.bindRecentActivity();
   },
   destroyed() {
   },
@@ -55,16 +59,59 @@ export default {
     userState() {
       console.log('user state is: '+ this.$store.state.currentUser)
       return this.$store.state.currentUser;
-    }
+    },
+    ...mapState(['recentActivity'])
   },
   methods: {
-    ...mapActions(["loginUser", "bindUsers", "bindStalls"]),
+    ...mapActions(["loginUser", "bindUsers", "bindStalls", 'bindRecentActivity']),
+
+    getNotificationText(){
+
+    }
     //we need some type of method : 
     //method: whenever a user joins the app. we should check if any users are tied to an stall.
     //if they are tied to that stall, then we should place a variable "needsToCloseOut"
     //"needsToCloseOut = true" is going to display a full screen  with the timer + "unOccupy" the stall
   },
   watch: {
+    recentActivity() {
+      if(this.count >0) {
+      var latestUpdate = this.recentActivity[0];
+      var sentence = '';
+      console.log(latestUpdate);
+      if(latestUpdate.type == "stallChange") {
+        //the occupied status change 
+        if(latestUpdate.newStatus == true) {
+          //occupied status is now occupied
+          sentence = 'A user occupied stall: '+latestUpdate.stallID
+        }
+        else if(latestUpdate.newStatus == false) {
+          //occupied status is now occupied
+          sentence = 'A user left stall: '+latestUpdate.stallID
+        }
+      }
+      else if(latestUpdate.type == "reservationChange") {
+        //the occupied status change 
+        sentence = 'A user reserved stall: '+latestUpdate.stallID+ ' at 10:35pm'
+      }
+      if(sentence != ''){
+        console.log('sending notification '+ sentence);
+        this.displayMsg = sentence;
+        if(this.displayNotification == false){
+          this.displayNotification = true;
+          setTimeout(() => {
+          this.displayNotification = false
+        }, 3200)
+        }
+      }
+      else if(sentence == ''){
+        console.error('cannot change the notification because sentence is null')
+      }
+      }
+      else {
+        this.count++;
+      }
+    }
       //this is only going to load the available data for the current front-end configuration
       //when a firebase collection change occurs..... unless we need to watch for changes in the fb collection to?
      // this.loadFloorData()

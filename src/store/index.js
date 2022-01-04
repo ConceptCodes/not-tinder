@@ -27,10 +27,8 @@ function checkIfTimeConflict(reservations, suggestedTime) {
       if(reservationTime < suggestedTime) {
         //diff = the milliseconds from reservation time to suggested
         var diff = suggestedTime.diff(reservationTime, ['hours','minutes']).toObject(); 
-        console.log(diff);
         if(diff.hours== 0 && diff.minutes <= 30){
           //the reservation time is within 30 minutes from each other. 
-          console.log('r u crashing here')
           return true;
         }
         //else- there is no conflict from reservation to suggested
@@ -39,7 +37,6 @@ function checkIfTimeConflict(reservations, suggestedTime) {
         //the milliseconds from reservation time to suggested
         var diff2 = reservationTime.diff(suggestedTime, ['hours','minutes']).toObject(); 
         if(diff2.hours== 0 && diff2.minutes <= 30){
-          console.log('r u crashing here')
           //the reservation time is within 30 minutes from each other. 
           return true;
         }
@@ -67,6 +64,7 @@ const store = new Vuex.Store({
     currentFloor: 1,
     currentGender: 'f',
     currentUserDocID: null,
+    recentActivity: [],
     users: []
   },
   getters: {
@@ -114,6 +112,14 @@ const store = new Vuex.Store({
         } else {
           return false;
         }
+      },
+      latestActivity: (state) => {
+        var lengthOfArray = state.recentActivity.length;
+        if(lengthOfArray >= 9){
+          console.log(state.recentActivity.slice(0,9))
+          return state.recentActivity.slice(0,4);
+        }
+        return state.recentActivity;
       },
       //get stall has reservation 
       //the reserve ahead feature is attached to the specific stall (that is selected)
@@ -206,6 +212,9 @@ const store = new Vuex.Store({
       });
     },
     SET_STALLS: (state, payload) => { state.stalls = payload },
+    SET_REPORT_OCCUPIED: (state, payload) => {
+      db.collection("stall_id").doc(payload).update({occupied: true, duration: currentTime, user: 'unknown '});
+    },
     set_current_floor_increment: (state) => {state.currentFloor++},
     set_current_floor_decrement: (state) => {state.currentFloor--},
     set_current_gender: (state, payload) => { state.currentGender = payload; console.log('the current gender in vuex is: ' +state.currentGender)},
@@ -228,6 +237,18 @@ const store = new Vuex.Store({
       db.collection("stall_id").doc(anyStalls[0].id).update({reservation: firebase.firestore.FieldValue.arrayUnion({time: firebaseTimestamp, user: state.currentUser})});
       db.collection("users").doc(anyUsers[0].id).update({reservation: firebase.firestore.FieldValue.arrayUnion({time: firebaseTimestamp, stall_id: anyStalls[0].id})});
     },
+    RESERVATION_UNBOOKING(state, payload){
+      //loop through all the reser
+      var thisUser = state.users.filter(user => user.user === state.currentUser);
+      for (var r in thisUser[0].reservation) {
+        var res = DateTime.fromSeconds(thisUser[0].reservation[r].time.seconds);
+        var time = res.toLocaleString({hour: '2-digit', minute: '2-digit'});
+        if(time == payload.time && thisUser[0].reservation[r].stall_id == payload.stallID){
+          db.collection("users").doc(thisUser[0].id).update({reservation: firebase.firestore.FieldValue.arrayRemove(thisUser[0].reservation[r])});
+        }
+      }
+
+    },
     //needs a set reservation button. that will add the timestamp to the reservation array. 
     ...vuexfireMutations
   },
@@ -238,6 +259,9 @@ const store = new Vuex.Store({
         }),
         bindUsers: firestoreAction(({ bindFirestoreRef }) => {
           return bindFirestoreRef('users', db.collection('users') )
+        }),
+        bindRecentActivity: firestoreAction(({ bindFirestoreRef }) => {
+          return bindFirestoreRef('recentActivity', db.collection('activity').orderBy('time_stamp', "desc"))
         }),
       loginUser({commit}) {
         console.log('attempting to login')
@@ -264,6 +288,12 @@ const store = new Vuex.Store({
       },
       onReservationAction(context, value) {
         context.commit('RESERVATION_BOOKING', value)
+      },
+      onReportOccupiedAction(context, value) {
+        context.commit('SET_REPORT_OCCUPIED', value)
+      },
+      onReservationUnbookingAction(context, value) {
+        context.commit('RESERVATION_UNBOOKING', value)
       }
     }
 })

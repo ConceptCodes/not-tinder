@@ -9,12 +9,14 @@ import VueLuxon from "vue-luxon";
 //import Home from './components/FloorCard'
 import Reservations from '@/components/Reservations'
 import Home from '@/components/FloorCardHome'
+import RecentActivity from '@/components/RecentActivity'
 Vue.config.productionTip = false
 Vue.use(VueRouter);
 Vue.use(VueLuxon);
 const routes = [
   { path: '/', name: 'Home', component: Home },
-  { path: '/reservations', component: Reservations}
+  { path: '/activity', name: 'Activity', component: RecentActivity},
+  { path: '/reservations', name: 'Reservations', component: Reservations}
 ]
 
 const router = new VueRouter({

@@ -1,16 +1,32 @@
 <template>
     <v-main class="container">
-        <div class="fixed fixed--center" style="z-index: 3" v-if="userOccupiesStall">
-        <h2>This view would load if a user occupies a stall</h2>
-        <Vue2InteractDraggable
-          v-if="isVisible"
-          :interact-x-threshold="100"
-          @draggedRight="accept"
-          @draggedLeft="decline"
-          class="rounded-borders card"
+      <div v-if="displayNotification" class="moveSnackbar" style="z-index: 10">
+        <v-snackbar
+      v-model="snackbar"
+      :timeout="timeout"
+      style="z-index: 10; padding-top: 13%"
+      max-width="300"
+      min-width="300"
+      min-height="35"
+      max-height="35"
+      top
+    >
+      {{ displayMsg }}
+
+      <template v-slot:action="{ attrs }">
+        <v-btn
+          color="blue"
+          text
+          v-bind="attrs"
+          @click="snackbar = false"
         >
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
+      </div>
+        <div class="occupiedFixed occupiedFixed--center card" style="z-index: 3" v-if="userOccupiesStall">
           <FloorCardOccupied @unoccupyStall="onUnoccupy"/>
-        </Vue2InteractDraggable>
       </div>
       <div class="fixed fixed--center" style="z-index: 3" v-if="!userOccupiesStall">
         <Vue2InteractDraggable
@@ -20,7 +36,7 @@
           @draggedLeft="decline"
           class="rounded-borders card"
         >
-          <FloorCard @clicked="onGenderSwitch" :floor_num="index" @bookingReservation="onBookingReservation" @booking="onBooking" :title="current.text" :storeFloorStalls="stallsVueFire"/>
+          <FloorCard @clicked="onGenderSwitch" :floor_num="index" @bookingReservation="onBookingReservation" @booking="onBooking" @reportOccupied="onReportOccupied" :title="current.text" :storeFloorStalls="stallsVueFire"/>
         </Vue2InteractDraggable>
       </div>
     <div
@@ -41,6 +57,7 @@ import FloorCardOccupied from '@/components/FloorCardOccupied'
 export default {
     name: 'floor-card-home',
     components: { Vue2InteractDraggable, FloorCard, FloorCardOccupied },
+    props: ['displayNotification', 'displayMsg'],
   data() {
     return {
       isVisible: true,
@@ -50,6 +67,9 @@ export default {
       genderSelected : 'b',
       drawer: false,
       group: null,
+      exampleText: 'a computed should do well here',
+      timeout: 3000,
+      snackbar: true,
       //pipe the current data into cards. like here.
       // what data should be passed?
       cards: [
@@ -116,12 +136,11 @@ export default {
     stallsVueFire() {
       return this.stallState;
     },
-    ...mapGetters({ timeDifference: "getDurationFromNow", userOccupies: "getUserOccupiesStall", currentUser: "currentUser",  floorStalls: "getStallsByFloor", countFloor: "getCurrentFloor", stallState: "getStallWithState" })
-    
+    ...mapGetters({ timeDifference: "getDurationFromNow", userOccupies: "getUserOccupiesStall", currentUser: "currentUser",  floorStalls: "getStallsByFloor", countFloor: "getCurrentFloor", stallState: "getStallWithState" }),
   },
   methods: {
     ...mapMutations(['set_current_gender']),
-    ...mapActions(['onReservationAction','onUnbookingAction','increaseFloor','decreaseFloor', "updateGender" ,"loginUser", 'onBookingAction', 'bindStalls', 'bindUsers']),
+    ...mapActions(['onReportOccupiedAction','onReservationAction','onUnbookingAction','increaseFloor','decreaseFloor', "updateGender" ,"loginUser", 'onBookingAction', 'bindStalls', 'bindUsers']),
     accept() {
       if(this.index!=6){
       setTimeout(() => this.isVisible = false, 200)
@@ -154,6 +173,9 @@ export default {
       console.log('Database update: A booking has been made at stall: '+value+ ' now we send to firebase');
       this.onBookingAction(value);
     },
+    onReportOccupied(value){
+      this.onReportOccupiedAction(value);
+    },
     onUnoccupy(){
       //run action to unbook the stall
       console.log('running onunoccupy command');
@@ -183,6 +205,16 @@ export default {
       //this is only going to load the available data for the current front-end configuration
       //when a firebase collection change occurs..... unless we need to watch for changes in the fb collection to?
      // this.loadFloorData()
+     displayNotification() {
+       console.log('display message: '+this.displayMsg)
+       console.log('should begin the recent notification if = true '+this.displayNotification)
+       if(this.displayNotification == true){
+         this.snackbar = true;
+       } 
+       else {
+         this.snackbar = false;
+       }
+     }
   }
 };
 </script>
@@ -219,6 +251,17 @@ export default {
   }
 }
 
+.occupiedFixed {
+    position: fixed;
+    
+    &--center {
+    left: 50%;
+    top: 37.5%;
+    min-height: 500px;
+    height: 280px;
+    transform: translate(-50%, -50%);
+  }
+}
 .menuCard {
   width: 300px;
   height: 45px;
@@ -243,6 +286,11 @@ export default {
     width: 260px;
     top: 37%;
   }
+}
+
+.moveSnackbar{
+  position: fixed;
+
 }
 </style>
 

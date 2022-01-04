@@ -27,11 +27,14 @@
       <v-row  style="margin-top: 10px; margin-bottom: 5px;">
         <v-card-subtitle v-if="stallSelection == null" style="color: white">Choose a stall and/or a reservation time to continue.</v-card-subtitle>
         <v-btn style="width: 45%;"
-          elevation="2" @click="bookStall(occupiedID)" :disabled="stallSelection == null"
+          elevation="2" v-if="selection==null" @click="bookStall(occupiedID)" :disabled="stallSelection == null"
         >Book Now</v-btn>
-                <v-btn style="width: 45%; margin-left: 10%;" 
+                <v-btn style="width: 90%; margin-left: 4%; margin-right: 4%;" v-if="selection"
           elevation="2" :disabled="stallSelection == null" @click="bookReservation(reservationTimes[selection].timestamp, storeFloorStalls[stallSelection].id)"
         >Reserve</v-btn>
+         <v-btn style="width: 45%; margin-left: 10%; font-size: 12px" 
+          elevation="2" :disabled="stallSelection == null" v-if="selection == null" @click="reportOccupied(occupiedID)"
+        >Report Occupied</v-btn>
       </v-row>
       </v-card-text>
   </v-card>
@@ -42,7 +45,7 @@ import {  mapActions, mapState, mapGetters } from "vuex";
 export default {
     name: 'floor-card-store',
     data: ()=> ({
-        selection: 1,
+        selection: null,
         stallSelection: null,
         isOrange: true,
         timerOne: null,
@@ -134,8 +137,7 @@ export default {
           }
         },
       },
-    occupiedID (value) {
-        console.log(value);
+    occupiedID () {
         return this.storeFloorStalls[this.stallSelection].id;
         },
       colorOfCard: function() {
@@ -169,6 +171,14 @@ export default {
               this.$emit('booking', value);
           }
           else {
+            alert('Error: some data was not added, therefore booking not available at this time.') 
+          }
+      },
+      reportOccupied(value){
+        if(value!=null){
+          this.$emit('reportOccupied', value);
+        }
+        else {
             alert('Error: some data was not added, therefore booking not available at this time.') 
           }
       },

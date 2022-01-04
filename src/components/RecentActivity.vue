@@ -1,40 +1,36 @@
-<template>
-  <v-card style="z-index: 3" :class="colorOfCard"  class="mx-auto fixed fixed--center card  my-12 darken-2 white--text" max-width="600" id="floor-card">
+<template >
+  <v-card if="latestActivity" style="z-index: 3" :class="colorOfCard"  class="mx-auto fixed fixed--center card  my-12 darken-2 white--text" max-width="600" id="floor-card">
     <v-list subheader>
-      <v-subheader style="color: white; font-size: 15px; font-weight: 800; background-color: teal; align-items: center; justify-content: center; text-align: center;">Your Reservations</v-subheader>
+      <v-subheader style="color: white; font-size: 15px; font-weight: 800; background-color: teal; align-items: center; justify-content: center; text-align: center;">Latest Activity</v-subheader>
 
       <v-list-item
-        v-for="res in reservations"
+        v-for="res in latestActivity"
         :key="res.id"
       >
-
         <v-list-item-content>
-          <v-list-item-title v-text="res.stallID"></v-list-item-title>
+          <v-list-item-title v-text="'ID: '+res.stallID"></v-list-item-title>
         </v-list-item-content>
         <v-list-item-content>
-          <v-list-item-title v-text="res.date"></v-list-item-title>
+          <v-list-item-title v-text="res.oldStatus"></v-list-item-title>
+        </v-list-item-content>
+                <v-list-item-content>
+          <v-list-item-title v-text="' -> '"></v-list-item-title>
         </v-list-item-content>
         <v-list-item-content>
-          <v-list-item-title v-text="res.time"></v-list-item-title>
+          <v-list-item-title v-text="res.newStatus"></v-list-item-title>
         </v-list-item-content>
-
-        <v-list-item-icon @click="deleteReservation(res)">
-          <v-icon class="hoverIcon">
-           mdi-close
-          </v-icon>
-        </v-list-item-icon>
       </v-list-item>
     </v-list>
 
 
 
-    <v-card-title text="center" style="margin-left: 20%; margin-top: 52%; text-align: center;"></v-card-title>
+    <v-card-title text="center" style="margin-left: 20%; margin-top: 28%; text-align: center;"></v-card-title>
     <v-card-text>
       <v-chip-group v-model="selection" active-class="black white--text" column style="margin-left: 20%; text-align: center;">
       </v-chip-group>
       <v-divider class="mx-2"></v-divider>
       <v-row>
-        <v-btn style="margin-top: 35px; margin-left: 15px; width: 90%;"
+        <v-btn style="margin-top: 35px; margin-left: 15px; width: 90%;" @click="checkActivity()"
         >Back to Home Page</v-btn>
       </v-row>
     </v-card-text>
@@ -42,9 +38,9 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import { mapGetters } from "vuex";
 export default {
-    name: 'reservations',
+    name: 'recent-activity',
     data: () => ({
       colorOfCard: 'teal',
       isOrange: true,
@@ -53,25 +49,18 @@ export default {
     created() {
     },
     computed: {
-      reservations() {
-      console.log(this.userReservation)
-      return this.userReservation;
+      latestActivity() {
+      return this.latestActivity;
     },
-      ...mapGetters({ userReservation: "getReservations" })
+      ...mapGetters({ latestActivity: "latestActivity" })
     },
     methods: {
       luxonCalculate(time) {
         return this.$luxon(time, "dd-MM-yyyy")
       },
-      deleteReservation(reservationObject) {
-        //we could probably find the reservation by using the time, stall, and current user
-        //and then deleting from there.
-        //it would be nice to have a confirmation- and some type of hover affect to confirm
-        //run action to unbook the reservation
-        console.log('running onunoccupy command');
-        this.onReservationUnbookingAction(reservationObject);
+      checkActivity(){
+          console.log(this.latestActivity);
       },
-    ...mapActions(['onReservationUnbookingAction'])
     }
 }
 </script>

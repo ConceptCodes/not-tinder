@@ -1,8 +1,9 @@
 <template>
   <v-card :class="colorOfCard"  class="mx-auto my-12 darken-2 white--text" max-width="600" id="floor-card">
     <v-card-title class="dark-orange">{{title}}</v-card-title>
-    <v-card-text>
-      <div class="white--text">HELLO HELLO, and an average usage time of 2 minutes. Expect longer wait times between 8am-9:30am and 4pm-5:30pm.</div>
+    <v-card-text v-if="metrics">
+      <div class="white--text">Average stall usage time: <span style="font-size: large">{{averageDuration}}</span></div>
+      <div class="white--text">Total # of entries : <span style="font-size: large">{{metrics.number}}</span></div>
     </v-card-text>
     <v-chip-group v-model="genderSelection" active-class="black white--text" column>
         <v-chip style="margin-left: 25%;">Male</v-chip>
@@ -42,6 +43,8 @@
 
 <script>
 import {  mapActions, mapState, mapGetters } from "vuex";
+
+
 export default {
     name: 'floor-card-store',
     data: ()=> ({
@@ -56,6 +59,7 @@ export default {
         timeTwo: 0,
         occupiedCheckOne: false,
         occupiedCheckTwo: false,
+        averageDuration: 0
     }),
     created() {
       this.timerOneRunning == false;
@@ -92,6 +96,9 @@ export default {
             type: Number,
             default: 0
         },
+        metrics: {
+          type: Object
+        },
         title: {
             type: String,
             default: 'Floor Name'
@@ -103,6 +110,20 @@ export default {
         storeFloorStalls: {
             type: Array
         }
+    },
+    watch: {
+      metrics: function (val) {
+        console.log('the metric has changed')
+        console.log(val)
+        if(val.averageDuration != "no data"){
+        var parsedDate = val.averageDuration.substring(val.averageDuration.lastIndexOf(' 00:')+4)
+        console.log(val)
+        this.averageDuration = (`${parsedDate.substring(0, 2)} M ${parsedDate.substring(3,5)} S`)
+        }
+        else {
+          this.averageDuration = 'No data :('
+        }
+      }
     },
     computed: {
       ...mapState(["stalls", "currentGender"]),

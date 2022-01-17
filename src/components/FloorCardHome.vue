@@ -36,7 +36,7 @@
           @draggedLeft="decline"
           class="rounded-borders card"
         >
-          <FloorCard @clicked="onGenderSwitch" :floor_num="index" @bookingReservation="onBookingReservation" @booking="onBooking" @reportOccupied="onReportOccupied" :title="current.text" :storeFloorStalls="stallsVueFire"/>
+          <FloorCard @clicked="onGenderSwitch" :floor_num="index" :metrics="floorMetrics" @bookingReservation="onBookingReservation" @booking="onBooking" @reportOccupied="onReportOccupied" :title="current.text" :storeFloorStalls="stallsVueFire"/>
         </Vue2InteractDraggable>
       </div>
     <div
@@ -53,6 +53,7 @@ import { Vue2InteractDraggable } from "vue2-interact";
 import FloorCard from '@/components/FloorCard'
 import { mapGetters, mapActions, mapMutations } from "vuex";
 import FloorCardOccupied from '@/components/FloorCardOccupied'
+import axios from 'axios'
 
 export default {
     name: 'floor-card-home',
@@ -67,6 +68,7 @@ export default {
       genderSelected : 'b',
       drawer: false,
       group: null,
+      floorMetrics: null,
       exampleText: 'a computed should do well here',
       timeout: 3000,
       snackbar: true,
@@ -95,7 +97,7 @@ export default {
     };
   },
   mounted() {
-    
+    axios.get(`https://metrics-ooqigdh2aa-uc.a.run.app/count?floor=${this.index+1}&time=3`).then(response => (this.floorMetrics = response.data))
     console.log('mounted  call of vuexstalldata = '+ this.vuexStallData)
     //this.loadFloorsInitally();
             //this.loadFloors();
@@ -142,7 +144,7 @@ export default {
     ...mapMutations(['set_current_gender']),
     ...mapActions(['onReportOccupiedAction','onReservationAction','onUnbookingAction','increaseFloor','decreaseFloor', "updateGender" ,"loginUser", 'onBookingAction', 'bindStalls', 'bindUsers']),
     accept() {
-      if(this.index!=6){
+      if(this.index<6){
       setTimeout(() => this.isVisible = false, 200)
       setTimeout(() => {
         // we could prob just update the state here/ the current floor
@@ -154,7 +156,7 @@ export default {
       }
     },
     decline() {
-      if(this.index!=0){
+      if(this.index>0){
       setTimeout(() => (this.isVisible = false), 200);
       setTimeout(() => {
         this.decreaseFloor();
@@ -202,6 +204,9 @@ export default {
     //"needsToCloseOut = true" is going to display a full screen  with the timer + "unOccupy" the stall
   },
   watch: {
+    index() {
+      axios.get(`https://metrics-ooqigdh2aa-uc.a.run.app/count?floor=${this.index+1}&time=3`).then(response => (this.floorMetrics = response.data))
+    },
       //this is only going to load the available data for the current front-end configuration
       //when a firebase collection change occurs..... unless we need to watch for changes in the fb collection to?
      // this.loadFloorData()
